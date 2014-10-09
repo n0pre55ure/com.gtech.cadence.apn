@@ -40,13 +40,13 @@ static char launchNotificationKey;
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
-    CDVAPN *pushHandler = [self getCommandInstance:@"CDVAPN"];
+    CDVAPN *pushHandler = [self getCommandInstance:@"APN"];
     [pushHandler didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
-    CDVAPN *pushHandler = [self getCommandInstance:@"CDVAPN"];
+    CDVAPN *pushHandler = [self getCommandInstance:@"APN"];
     [pushHandler didFailToRegisterForRemoteNotificationsWithError:error];
 }
 
@@ -63,7 +63,7 @@ static char launchNotificationKey;
     
     if (appState == UIApplicationStateActive)
     {
-        CDVAPN *pushHandler = [self getCommandInstance:@"CDVAPN"];
+        CDVAPN *pushHandler = [self getCommandInstance:@"APN"];
         pushHandler.notificationMessage = userInfo;
         pushHandler.isInline = YES;
         [pushHandler notificationReceived];
@@ -76,14 +76,11 @@ static char launchNotificationKey;
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-    
-    NSLog(@"[CDVAPN] Active");
-    
     application.applicationIconBadgeNumber = 0;
 
     if (self.launchNotification)
     {
-        CDVAPN *pushHandler = [self getCommandInstance:@"CDVAPN"];
+        CDVAPN *pushHandler = [self getCommandInstance:@"APN"];
 		
         pushHandler.notificationMessage = self.launchNotification;
         self.launchNotification = nil;

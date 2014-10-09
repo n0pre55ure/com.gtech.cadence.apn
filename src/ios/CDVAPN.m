@@ -11,7 +11,6 @@
 
 - (void)pluginInitialize
 {
-    NSLog(@"TEST");
     [self register];
 }
 
@@ -115,7 +114,7 @@
     }
     else
     {
-    		[[UIApplication sharedApplication] registerForRemoteNotificationTypes:notificationTypes];
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:notificationTypes];
     }
 #else
 		[[UIApplication sharedApplication] registerForRemoteNotificationTypes:notificationTypes];
@@ -129,6 +128,7 @@
 
 - (void)didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
+    NSLog(@"[CDVAPN] Registering Device");
     NSString *host = @"apns.proxaphire.com";
     
     NSMutableDictionary *results = [NSMutableDictionary dictionary];
@@ -145,27 +145,23 @@
         [results setValue:appName forKey:@"appName"];
         [results setValue:appVersion forKey:@"appVersion"];
     
-        NSUInteger rntypes = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
-
         NSString *pushBadge = @"disabled";
         NSString *pushAlert = @"disabled";
         NSString *pushSound = @"disabled";
 
-
-        if(rntypes & UIRemoteNotificationTypeBadge)
-        {
-            pushBadge = @"enabled";
-        }
     
-        if(rntypes & UIRemoteNotificationTypeAlert)
-        {
-            pushAlert = @"enabled";
-        }
-    
-        if(rntypes & UIRemoteNotificationTypeSound)
-        {
-            pushSound = @"enabled";
-        }
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+        UIUserNotificationSettings *rntypes = [[UIApplication sharedApplication] currentUserNotificationSettings];
+        UIUserNotificationType notifTypes = rntypes.types;
+        pushBadge = (notifTypes & UIUserNotificationTypeBadge) ? @"enabled" : @"disabled";
+        pushAlert = (notifTypes & UIUserNotificationTypeAlert) ? @"enabled" : @"disabled";
+        pushSound = (notifTypes & UIUserNotificationTypeSound) ? @"enabled" : @"disabled";
+#else
+        NSUInteger rntypes = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
+        pushBadge = (rntypes & UIRemoteNotificationTypeBadge) ? @"enabled" : @"disabled";
+        pushAlert = (rntypes & UIRemoteNotificationTypeAlert) ? @"enabled" : @"disabled";
+        pushSound = (rntypes & UIRemoteNotificationTypeSound) ? @"enabled" : @"disabled";
+#endif
 
         [results setValue:pushBadge forKey:@"pushBadge"];
         [results setValue:pushAlert forKey:@"pushAlert"];

@@ -2,10 +2,10 @@
 #import <Cordova/CDV.h>
 #import <Cordova/CDVPlugin.h>
 
-@interface CDVAPN : CDVPlugin
+@interface CDVAPN: CDVPlugin
 {
     NSDictionary *notificationMessage;
-    BOOL    isInline;
+    BOOL isInline;
     NSString *notificationCallbackId;
     NSString *callback;
     BOOL ready;
