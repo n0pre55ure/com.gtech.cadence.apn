@@ -21,7 +21,8 @@
 
 		<config-file target="config.xml" parent="/*">
 			<feature name="APN">
-				<param name="ios-package" value="CDVAPN"/>
+				<param name="ios-package" value="CDVAPN" onload="true" "/>
+                <param name="onload" value="true" />
 			</feature>
 		</config-file>
 

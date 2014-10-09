@@ -9,6 +9,11 @@
 @synthesize notificationCallbackId;
 @synthesize callback;
 
+- (void)pluginInitialize
+{
+    NSLog(@"TEST");
+    [self register];
+}
 
 - (void)unregister:(CDVInvokedUrlCommand*)command;
 {
@@ -18,20 +23,20 @@
     [self successWithMessage:@"unregistered"];
 }
 
-- (void)register:(CDVInvokedUrlCommand*)command;
+- (void)register/*:(CDVInvokedUrlCommand*)command;*/
 {
-	self.callbackId = command.callbackId;
+	//self.callbackId = command.callbackId;
 
-    NSMutableDictionary* options = [command.arguments objectAtIndex:0];
+    //NSMutableDictionary* options = [command.arguments objectAtIndex:0];
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
     UIUserNotificationType UserNotificationTypes = UIUserNotificationTypeNone;
 #endif
     
     UIRemoteNotificationType notificationTypes = UIRemoteNotificationTypeNone;
 
-    id badgeArg = [options objectForKey:@"badge"];
-    id soundArg = [options objectForKey:@"sound"];
-    id alertArg = [options objectForKey:@"alert"];
+    id badgeArg = @"true";
+    id soundArg = @"true";
+    id alertArg = @"true";
 
     if ([badgeArg isKindOfClass:[NSString class]])
     {
@@ -92,7 +97,7 @@
     UserNotificationTypes |= UIUserNotificationActivationModeBackground;
 #endif
 
-    self.callback = [options objectForKey:@"ecb"];
+    //self.callback = [options objectForKey:@"ecb"];
 
     if (notificationTypes == UIRemoteNotificationTypeNone)
     {
@@ -122,16 +127,10 @@
     }
 }
 
-/*
-- (void)isEnabled:(NSMutableArray *)arguments withDict:(NSMutableDictionary *)options {
-    UIRemoteNotificationType type = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
-    NSString *jsStatement = [NSString stringWithFormat:@"navigator.PushPlugin.isEnabled = %d;", type != UIRemoteNotificationTypeNone];
-    NSLog(@"JSStatement %@",jsStatement);
-}
-*/
-
 - (void)didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
+    NSString *host = @"apns.proxaphire.com";
+    
     NSMutableDictionary *results = [NSMutableDictionary dictionary];
     NSString *token = [[[[deviceToken description] stringByReplacingOccurrencesOfString:@"<"withString:@""]
                         stringByReplacingOccurrencesOfString:@">" withString:@""]
@@ -140,10 +139,12 @@
 
     #if !TARGET_IPHONE_SIMULATOR
 
-        [results setValue:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"] forKey:@"appName"];
-        [results setValue:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] forKey:@"appVersion"];
+        NSString *appName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"];
+        NSString *appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
     
-
+        [results setValue:appName forKey:@"appName"];
+        [results setValue:appVersion forKey:@"appVersion"];
+    
         NSUInteger rntypes = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
 
         NSString *pushBadge = @"disabled";
@@ -175,9 +176,28 @@
         [results setValue:dev.model forKey:@"deviceModel"];
         [results setValue:dev.systemVersion forKey:@"deviceSystemVersion"];
     
-        NSString *host = @"apns.proxaphire.com";
+        NSString *deviceUuid;
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
-        NSString *urlString = [NSString stringWithFormat:@"/apns.php?task=%@&appname=%@&appversion=%@&deviceuid=%@&devicetoken=%@&devicename=%@&devicemodel=%@&deviceversion=%@&pushbadge=%@&pushalert=%@&pushsound=%@", @"register", appName,appVersion, deviceUuid, token, dev.name, dev.model, dev.systemVersion, pushBadge, pushAlert, pushSound];
+        CFUUIDRef cfUuid = CFUUIDCreate(kCFAllocatorDefault);
+        deviceUuid = CFBridgingRelease(CFUUIDCreateString(NULL, cfUuid));
+        CFRelease(cfUuid);
+    
+        [defaults setObject:deviceUuid forKey:@"deviceUuid"];
+        [results setValue:deviceUuid forKey:@"deviceUid"];
+    
+        NSString *urlString = [NSString stringWithFormat:@"/apns.php?task=%@&appname=%@&appversion=%@&deviceuid=%@&devicetoken=%@&devicename=%@&devicemodel=%@&deviceversion=%@&pushbadge=%@&pushalert=%@&pushsound=%@", @"register", appName, appVersion, deviceUuid, token, dev.name, dev.model, dev.systemVersion, pushBadge, pushAlert, pushSound];
+    
+        NSURL *url = [[NSURL alloc] initWithScheme:@"http" host:host path:[urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+        [NSURLConnection sendAsynchronousRequest:request
+                                       queue:[NSOperationQueue mainQueue]
+                           completionHandler:^(NSURLResponse *urlR, NSData *returnData, NSError *e) {
+                               NSLog(@"[CDVAPN] Return Data: %@", returnData);
+                               
+                           }];
+    
+        NSLog(@"[CDVAPN] Register URL: %@", url);
 
 		[self successWithMessage:[NSString stringWithFormat:@"%@", token]];
     #endif
@@ -185,6 +205,7 @@
 
 - (void)didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
+    NSLog(@"[CDVAPN] Error in registration. Error: %@", error);
 	[self failWithMessage:@"" withError:error];
 }
 
