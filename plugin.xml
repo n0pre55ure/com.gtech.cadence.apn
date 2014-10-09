@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    id="com.gtech.cadence.apn"
+    version="14.10.9">
+
+    <name>APN</name>
+	<description>Cordova iOS7+ APN</description>
+	<license>MIT</license>
+    <keywords>cordova, ios, apn</keywords>
+    <repo>https://github.com/n0per55ure/com.gtech.cadence.apn.git</repo>
+
+	<js-module src="www/APN.js" name="APN">
+        <clobbers target="window.plugins.apn" />
+	</js-module>
+
+	<engines>
+		<engine name="cordova" version=">=3.4.0" />
+	</engines>
+
+	<platform name="ios">
+
+		<config-file target="config.xml" parent="/*">
+			<feature name="APN">
+				<param name="ios-package" value="CDVAPN"/>
+			</feature>
+		</config-file>
+
+		<source-file src="src/ios/AppDelegate+Notification.m" />
+		<source-file src="src/ios/CDVAPN.m" />
+
+		<header-file src="src/ios/AppDelegate+Notification.h" />
+		<header-file src="src/ios/CDVAPN.h" />
+
+	</platform>
+
+</plugin>
