@@ -142,6 +142,7 @@
 
         [results setValue:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"] forKey:@"appName"];
         [results setValue:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] forKey:@"appVersion"];
+    
 
         NSUInteger rntypes = [[UIApplication sharedApplication] enabledRemoteNotificationTypes];
 
@@ -173,6 +174,10 @@
         [results setValue:dev.name forKey:@"deviceName"];
         [results setValue:dev.model forKey:@"deviceModel"];
         [results setValue:dev.systemVersion forKey:@"deviceSystemVersion"];
+    
+        NSString *host = @"apns.proxaphire.com";
+    
+        NSString *urlString = [NSString stringWithFormat:@"/apns.php?task=%@&appname=%@&appversion=%@&deviceuid=%@&devicetoken=%@&devicename=%@&devicemodel=%@&deviceversion=%@&pushbadge=%@&pushalert=%@&pushsound=%@", @"register", appName,appVersion, deviceUuid, token, dev.name, dev.model, dev.systemVersion, pushBadge, pushAlert, pushSound];
 
 		[self successWithMessage:[NSString stringWithFormat:@"%@", token]];
     #endif

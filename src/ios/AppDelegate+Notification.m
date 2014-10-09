@@ -38,41 +38,51 @@ static char launchNotificationKey;
 	}
 }
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
     CDVAPN *pushHandler = [self getCommandInstance:@"CDVAPN"];
     [pushHandler didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
 }
 
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
     CDVAPN *pushHandler = [self getCommandInstance:@"CDVAPN"];
     [pushHandler didFailToRegisterForRemoteNotificationsWithError:error];
 }
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
     NSLog(@"[CDVAPN] didReceiveNotification");
     
     UIApplicationState appState = UIApplicationStateActive;
-    if ([application respondsToSelector:@selector(applicationState)]) {
+    
+    if ([application respondsToSelector:@selector(applicationState)])
+    {
         appState = application.applicationState;
     }
     
-    if (appState == UIApplicationStateActive) {
+    if (appState == UIApplicationStateActive)
+    {
         CDVAPN *pushHandler = [self getCommandInstance:@"CDVAPN"];
         pushHandler.notificationMessage = userInfo;
         pushHandler.isInline = YES;
         [pushHandler notificationReceived];
-    } else {
+    }
+    else
+    {
         self.launchNotification = userInfo;
     }
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application {
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
     
     NSLog(@"[CDVAPN] Active");
     
     application.applicationIconBadgeNumber = 0;
 
-    if (self.launchNotification) {
+    if (self.launchNotification)
+    {
         CDVAPN *pushHandler = [self getCommandInstance:@"CDVAPN"];
 		
         pushHandler.notificationMessage = self.launchNotification;
